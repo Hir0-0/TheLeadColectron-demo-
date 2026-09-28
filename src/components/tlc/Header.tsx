@@ -1,5 +1,7 @@
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Download, FileText, Gem } from "lucide-react";
+import { Download, FileText, Gem, Upload } from "lucide-react";
+import { useLeadStore } from "@/store/useLeadStore";
 
 export function Header({
   onCsv,
@@ -10,6 +12,33 @@ export function Header({
 }) {
   const { t, i18n } = useTranslation();
   const lang = i18n.language.startsWith("en") ? "en" : "pt";
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const store = useLeadStore();
+
+  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const jsonData = JSON.parse(event.target?.result as string);
+        
+        if (Array.isArray(jsonData)) {
+          store.setLeads(jsonData);
+        } else {
+          alert("O arquivo JSON não parece ser uma lista válida.");
+        }
+      } catch (error) {
+        alert("Erro ao ler o arquivo JSON. Certifique-se de que o formato está correto.");
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reseta o input para permitir selecionar o mesmo arquivo novamente
+    e.target.value = '';
+  };
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-xl">
@@ -25,6 +54,22 @@ export function Header({
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* Botão de Importar JSON com o input escondido */}
+          <button 
+            onClick={() => fileInputRef.current?.click()} 
+            className="btn-ghost-gold px-3 py-2 text-xs sm:text-sm"
+          >
+            <Upload className="mr-1.5 inline h-3.5 w-3.5" />
+            Importar JSON
+          </button>
+          <input
+            type="file"
+            accept=".json"
+            ref={fileInputRef}
+            onChange={handleImportJSON}
+            style={{ display: 'none' }}
+          />
+
           <button onClick={onCsv} className="btn-ghost-gold px-3 py-2 text-xs sm:text-sm">
             <Download className="mr-1.5 inline h-3.5 w-3.5" />
             {t("exportCsv")}
