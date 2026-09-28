@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "@/lib/i18n";
 import { IS_DEMO, loadLeads } from "@/lib/leads";
@@ -14,28 +13,7 @@ import { LeadsTable } from "@/components/tlc/LeadsTable";
 import { SavedListsPanel } from "@/components/tlc/SavedListsPanel";
 import { PdfModal } from "@/components/tlc/PdfModal";
 
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "TheLeadColectron — Prospecção premium de leads" },
-      {
-        name: "description",
-        content:
-          "Dashboard premium de prospecção de leads para designers: filtros, gráficos e exportação em CSV e PDF.",
-      },
-      { property: "og:title", content: "TheLeadColectron — Prospecção premium de leads" },
-      {
-        property: "og:description",
-        content: "Encontre, filtre e apresente leads com um painel elegante em tema escuro.",
-      },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Dashboard,
-});
-
-function Dashboard() {
+export default function Index() {
   const { t } = useTranslation();
   const store = useLeadStore();
   const [pdfOpen, setPdfOpen] = useState(false);
@@ -55,6 +33,7 @@ function Dashboard() {
     const sel = filtered.filter((l) => store.selected.includes(l.id));
     return sel.length ? sel : filtered;
   }, [filtered, store.selected]);
+  
   const pdfRows = useMemo(
     () => filtered.filter((l) => store.selected.includes(l.id)),
     [filtered, store.selected],
